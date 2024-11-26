@@ -4,6 +4,10 @@ from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import RegisterSerializer
+from rest_framework.decorators import api_view
+from django.shortcuts import get_object_or_404
+from .models import Question
+from .serializers import QuestionSerializer
 
 class RegisterView(APIView):
     def post(self, request):
@@ -35,3 +39,42 @@ class LogoutView(APIView):
             return Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def question_list(request):
+    questions = Question.objects.all()
+    serializer = QuestionSerializer(questions, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+def question_detail(request, pk):
+    question = get_object_or_404(Question, pk=pk)
+    serializer = QuestionSerializer(question)
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+def question_create(request):
+    serializer = QuestionSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['PUT', 'PATCH'])
+def question_update(request, pk):
+    question = get_object_or_404(Question, pk=pk)
+    serializer = QuestionSerializer(question, data=request.data, partial=('PATCH' in request.method))
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['DELETE'])
+def question_delete(request, pk):
+    question = get_object_or_404(Question, pk=pk)
+    question.delete()
+    return Response({"message": "Question deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
