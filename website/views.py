@@ -1,10 +1,11 @@
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import RegisterSerializer
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from django.shortcuts import get_object_or_404
 from .models import Question
 from .serializers import QuestionSerializer
@@ -55,6 +56,7 @@ def question_detail(request, pk):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def question_create(request):
     serializer = QuestionSerializer(data=request.data)
     if serializer.is_valid():
@@ -64,6 +66,7 @@ def question_create(request):
 
 
 @api_view(['PUT', 'PATCH'])
+@permission_classes([IsAuthenticated])
 def question_update(request, pk):
     question = get_object_or_404(Question, pk=pk)
     serializer = QuestionSerializer(question, data=request.data, partial=('PATCH' in request.method))
@@ -74,6 +77,7 @@ def question_update(request, pk):
 
 
 @api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
 def question_delete(request, pk):
     question = get_object_or_404(Question, pk=pk)
     question.delete()
