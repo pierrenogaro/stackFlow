@@ -60,7 +60,7 @@ def question_detail(request, pk):
 def question_create(request):
     serializer = QuestionSerializer(data=request.data)
     if serializer.is_valid():
-        serializer.save()
+        serializer.save(author=request.user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

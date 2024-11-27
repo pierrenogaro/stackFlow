@@ -16,6 +16,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 class QuestionSerializer(serializers.ModelSerializer):
+    author = serializers.StringRelatedField()
     class Meta:
         model = Question
         fields = '__all__'
