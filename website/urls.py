@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import RegisterView, LoginView, LogoutView, question_list, question_detail, question_create, \
-question_update, question_delete
+question_update, question_delete, answer_create
 
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
@@ -11,4 +11,5 @@ urlpatterns = [
     path('questions/create/', question_create, name='question_create'),
     path('questions/update/<int:pk>/', question_update, name='question_update'),
     path('questions/delete/<int:pk>/', question_delete, name='question_delete'),
+    path('questions/<int:pk>/answers/', answer_create, name='answer_create'),
 ]

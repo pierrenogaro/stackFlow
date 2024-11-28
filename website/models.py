@@ -9,3 +9,12 @@ class Question(models.Model):
 
     def __str__(self) -> str:
         return self.title
+
+class Answer(models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='answers')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='answers')
+    content = models.TextField()
+    date_created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return f"Answer by {self.author.username} to {self.question.title}"

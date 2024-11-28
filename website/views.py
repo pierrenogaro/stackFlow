@@ -4,10 +4,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import RegisterSerializer
+from .serializers import RegisterSerializer, AnswerSerializer
 from rest_framework.decorators import api_view, permission_classes
 from django.shortcuts import get_object_or_404
-from .models import Question
+from .models import Question, Answer
 from .serializers import QuestionSerializer
 
 class RegisterView(APIView):
@@ -51,8 +51,13 @@ def question_list(request):
 @api_view(['GET'])
 def question_detail(request, pk):
     question = get_object_or_404(Question, pk=pk)
-    serializer = QuestionSerializer(question)
-    return Response(serializer.data)
+    answers = Answer.objects.filter(question=question)
+    question_serializer = QuestionSerializer(question)
+    answer_serializer = AnswerSerializer(answers, many=True)
+    return Response({
+        "question": question_serializer.data,
+        "answers": answer_serializer.data
+    })
 
 
 @api_view(['POST'])
@@ -82,3 +87,13 @@ def question_delete(request, pk):
     question = get_object_or_404(Question, pk=pk)
     question.delete()
     return Response({"message": "Question deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def answer_create(request, pk):
+    question = get_object_or_404(Question, pk=pk)
+    serializer = AnswerSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save(author=request.user, question=question)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
