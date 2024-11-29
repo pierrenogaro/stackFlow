@@ -1,13 +1,17 @@
 from django.urls import path
 from .views import RegisterView, LoginView, LogoutView, question_list, question_detail, question_create, \
 question_update, question_delete, answer_create, answer_edit, answer_delete, comment_create, comment_update, \
-comment_delete
+comment_delete, profile_view, profile_update
 
 urlpatterns = [
 ################# REGISTRATION #################
     path('register/', RegisterView.as_view(), name='register'),
     path('login/', LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
+
+################# PROFILE #################
+    path('profile/<int:pk>/', profile_view, name='profile_view'),
+    path('profile/update/<int:pk>/', profile_update, name='profile_update'),
 
 ################# QUESTIONS #################
     path('questions/', question_list, name='question_list'),

@@ -1,14 +1,17 @@
+from django.contrib.auth.models import User
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import RegisterSerializer, AnswerSerializer, CommentSerializer
+from .serializers import RegisterSerializer, AnswerSerializer, CommentSerializer, ProfileSerializer
 from rest_framework.decorators import api_view, permission_classes
 from django.shortcuts import get_object_or_404
-from .models import Question, Answer, Comment
+from .models import Question, Answer, Comment, Profile
 from .serializers import QuestionSerializer
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 ################# REGISTRATION #################
 class RegisterView(APIView):
@@ -41,6 +44,38 @@ class LogoutView(APIView):
             return Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+################# PROFILE #################
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def profile_view(request, pk):
+
+    if request.user.id != pk:
+        return Response({"error": "You do not have permission to view this profile."}, status=status.HTTP_403_FORBIDDEN)
+
+    profile = get_object_or_404(Profile, user__id=pk)
+    serializer = ProfileSerializer(profile)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['PUT', 'PATCH'])
+@permission_classes([IsAuthenticated])
+def profile_update(request, pk):
+
+    if request.user.id != pk:
+        return Response({"error": "You do not have permission to update this profile."}, status=status.HTTP_403_FORBIDDEN)
+
+    profile = get_object_or_404(Profile, user__id=pk)
+    serializer = ProfileSerializer(profile, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+    instance.profile.save()
 
 ################# QUESTIONS #################
 @api_view(['GET'])

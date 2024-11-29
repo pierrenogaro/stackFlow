@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import Question, Answer, Comment
+from .models import Question, Answer, Comment, Profile
 
 
 ################# REGISTRATION #################
@@ -16,6 +16,15 @@ class RegisterSerializer(serializers.ModelSerializer):
             password=validated_data['password']
         )
         return user
+
+################# PROFILE #################
+class ProfileSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = Profile
+        fields = ['user', 'bio', 'location', 'birth_date']
+
 
 ################# QUESTIONS #################
 class QuestionSerializer(serializers.ModelSerializer):
