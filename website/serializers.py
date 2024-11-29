@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import Question, Answer
+from .models import Question, Answer, Comment
+
 
 ################# REGISTRATION #################
 class RegisterSerializer(serializers.ModelSerializer):
@@ -31,3 +32,11 @@ class AnswerSerializer(serializers.ModelSerializer):
         model = Answer
         fields = ['id', 'question', 'author', 'content', 'date_created']
         read_only_fields = ['question', 'author', 'date_created']
+
+################# COMMENT #################
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.StringRelatedField(read_only=True)
+    class Meta:
+        model = Comment
+        fields = ['id', 'author', 'content', 'date_created']
+        read_only_fields = ['id', 'author', 'date_created']

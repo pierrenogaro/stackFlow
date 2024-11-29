@@ -6,7 +6,7 @@ class Question(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='questions')
     title = models.CharField(max_length=255)
     question = models.TextField()
-    date = models.DateField()
+    date_created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
         return self.title
@@ -20,3 +20,13 @@ class Answer(models.Model):
 
     def __str__(self) -> str:
         return f"Answer by {self.author.username} to {self.question.title}"
+
+################# COMMENT #################
+class Comment(models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+    content = models.TextField()
+    date_created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Comment by {self.author.username} on {self.question.title}"

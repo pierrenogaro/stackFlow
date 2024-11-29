@@ -4,10 +4,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import RegisterSerializer, AnswerSerializer
+from .serializers import RegisterSerializer, AnswerSerializer, CommentSerializer
 from rest_framework.decorators import api_view, permission_classes
 from django.shortcuts import get_object_or_404
-from .models import Question, Answer
+from .models import Question, Answer, Comment
 from .serializers import QuestionSerializer
 
 ################# REGISTRATION #################
@@ -52,13 +52,19 @@ def question_list(request):
 
 @api_view(['GET'])
 def question_detail(request, pk):
+
     question = get_object_or_404(Question, pk=pk)
     answers = Answer.objects.filter(question=question)
+    comments = Comment.objects.filter(question=question)
+
     question_serializer = QuestionSerializer(question)
     answer_serializer = AnswerSerializer(answers, many=True)
+    comment_serializer = CommentSerializer(comments, many=True)
+
     return Response({
         "question": question_serializer.data,
-        "answers": answer_serializer.data
+        "answers": answer_serializer.data,
+        "comments": comment_serializer.data,
     })
 
 
@@ -132,3 +138,40 @@ def answer_delete(request, pk):
 
     answer.delete()
     return Response({"detail": "Answer deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+
+################# COMMENT #################
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def comment_create(request, pk):
+    question = get_object_or_404(Question, pk=pk)
+    serializer = CommentSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save(author=request.user, question=question)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['PUT', 'PATCH'])
+@permission_classes([IsAuthenticated])
+def comment_update(request, pk):
+    comment = get_object_or_404(Comment, pk=pk)
+
+    if comment.author != request.user:
+        return Response({"error": "You do not have permission to edit this comment."}, status=status.HTTP_403_FORBIDDEN)
+
+    serializer = CommentSerializer(comment, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def comment_delete(request, pk):
+    comment = get_object_or_404(Comment, pk=pk)
+
+    if comment.author != request.user:
+        return Response({"error": "You do not have permission to delete this comment."}, status=status.HTTP_403_FORBIDDEN)
+
+    comment.delete()
+    return Response({"message": "Comment deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+
