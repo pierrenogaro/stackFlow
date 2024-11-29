@@ -107,3 +107,28 @@ def answer_create(request, pk):
         serializer.save(author=request.user, question=question)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['PUT', 'PATCH'])
+@permission_classes([IsAuthenticated])
+def answer_edit(request, pk):
+    answer = get_object_or_404(Answer, pk=pk)
+
+    if answer.author != request.user:
+        return Response({"detail": "You do not have permission to edit this answer."}, status=status.HTTP_403_FORBIDDEN)
+
+    serializer = AnswerSerializer(answer, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def answer_delete(request, pk):
+    answer = get_object_or_404(Answer, pk=pk)
+
+    if answer.author != request.user:
+        return Response({"detail": "You do not have permission to delete this answer."},status=status.HTTP_403_FORBIDDEN)
+
+    answer.delete()
+    return Response({"detail": "Answer deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
