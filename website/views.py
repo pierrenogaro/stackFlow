@@ -10,6 +10,7 @@ from django.shortcuts import get_object_or_404
 from .models import Question, Answer
 from .serializers import QuestionSerializer
 
+################# REGISTRATION #################
 class RegisterView(APIView):
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
@@ -41,6 +42,7 @@ class LogoutView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+################# QUESTIONS #################
 @api_view(['GET'])
 def question_list(request):
     questions = Question.objects.all()
@@ -84,7 +86,6 @@ def question_update(request, pk):
         return Response(serializer.data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def question_delete(request, pk):
@@ -96,6 +97,7 @@ def question_delete(request, pk):
     question.delete()
     return Response({"message": "Question deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
+################# ANSWER #################
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def answer_create(request, pk):

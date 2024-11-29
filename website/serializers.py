@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 from .models import Question, Answer
 
+################# REGISTRATION #################
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -15,12 +16,14 @@ class RegisterSerializer(serializers.ModelSerializer):
         )
         return user
 
+################# QUESTIONS #################
 class QuestionSerializer(serializers.ModelSerializer):
     author = serializers.StringRelatedField()
     class Meta:
         model = Question
         fields = '__all__'
 
+################# ANSWER #################
 class AnswerSerializer(serializers.ModelSerializer):
     author = serializers.StringRelatedField(read_only=True)
 
