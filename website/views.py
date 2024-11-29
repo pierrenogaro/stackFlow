@@ -74,6 +74,10 @@ def question_create(request):
 @permission_classes([IsAuthenticated])
 def question_update(request, pk):
     question = get_object_or_404(Question, pk=pk)
+
+    if question.author != request.user:
+        return Response({"error": "You are not the author of this question"}, status=status.HTTP_403_FORBIDDEN)
+
     serializer = QuestionSerializer(question, data=request.data, partial=('PATCH' in request.method))
     if serializer.is_valid():
         serializer.save()
@@ -85,6 +89,10 @@ def question_update(request, pk):
 @permission_classes([IsAuthenticated])
 def question_delete(request, pk):
     question = get_object_or_404(Question, pk=pk)
+
+    if question.author != request.user:
+        return Response({"error": "You are not the author of this question"}, status=status.HTTP_403_FORBIDDEN)
+
     question.delete()
     return Response({"message": "Question deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
