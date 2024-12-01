@@ -5,10 +5,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import RegisterSerializer, AnswerSerializer, CommentSerializer, ProfileSerializer
+from .serializers import RegisterSerializer, AnswerSerializer, CommentSerializer, ProfileSerializer, FavoriteSerializer
 from rest_framework.decorators import api_view, permission_classes
 from django.shortcuts import get_object_or_404
-from .models import Question, Answer, Comment, Profile
+from .models import Question, Answer, Comment, Profile, Favorite
 from .serializers import QuestionSerializer
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -47,12 +47,7 @@ class LogoutView(APIView):
 
 ################# PROFILE #################
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
 def profile_view(request, pk):
-
-    if request.user.id != pk:
-        return Response({"error": "You do not have permission to view this profile."}, status=status.HTTP_403_FORBIDDEN)
-
     profile = get_object_or_404(Profile, user__id=pk)
     serializer = ProfileSerializer(profile)
     return Response(serializer.data, status=status.HTTP_200_OK)
@@ -209,4 +204,29 @@ def comment_delete(request, pk):
 
     comment.delete()
     return Response({"message": "Comment deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+
+################# FAVORITE #################
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def add_favorite(request, pk):
+    question = get_object_or_404(Question, pk=pk)
+    favorite, created = Favorite.objects.get_or_create(user=request.user, question=question)
+    if created:
+        return Response({"message": "Question added to favorites"}, status=status.HTTP_201_CREATED)
+    return Response({"message": "Question is already in favorites"}, status=status.HTTP_200_OK)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def remove_favorite(request, pk):
+    favorite = get_object_or_404(Favorite, user=request.user, question_id=pk)
+    favorite.delete()
+    return Response({"message": "Question removed from favorites"}, status=status.HTTP_204_NO_CONTENT)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def list_favorites(request):
+    favorites = Favorite.objects.filter(user=request.user)
+    serializer = FavoriteSerializer(favorites, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
 

@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import Question, Answer, Comment, Profile
+from .models import Question, Answer, Comment, Profile, Favorite
 
 
 ################# REGISTRATION #################
@@ -20,10 +20,14 @@ class RegisterSerializer(serializers.ModelSerializer):
 ################# PROFILE #################
 class ProfileSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True)
+    favorite_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
-        fields = ['user', 'bio', 'location', 'birth_date']
+        fields = ['user', 'bio', 'location', 'birth_date', 'favorite_count']
+
+    def get_favorite_count(self, obj):
+        return Favorite.objects.filter(user=obj.user).count()
 
 
 ################# QUESTIONS #################
@@ -49,3 +53,16 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = ['id', 'author', 'content', 'date_created']
         read_only_fields = ['id', 'author', 'date_created']
+
+################# FAVORITE #################
+class FavoriteSerializer(serializers.ModelSerializer):
+    question = serializers.StringRelatedField()
+    author = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Favorite
+        fields = ['id', 'author', 'question', 'added_at']
+        read_only_fields = ['added_at']
+
+    def get_author(self, obj):
+        return obj.question.author.username
