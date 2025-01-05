@@ -9,7 +9,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from stackFlow import settings
 from .serializers import RegisterSerializer, AnswerSerializer, CommentSerializer, ProfileSerializer, FavoriteSerializer
 from rest_framework.decorators import api_view, permission_classes
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from .models import Question, Answer, Comment, Profile, Favorite
 from .serializers import QuestionSerializer
 from django.db.models.signals import post_save
@@ -251,4 +251,6 @@ def list_favorites(request):
     serializer = FavoriteSerializer(favorites, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
-
+################# DOC #################
+def home(request):
+    return render(request, 'index.html')
