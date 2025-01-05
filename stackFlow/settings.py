@@ -142,3 +142,12 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
 }
+
+## ZOHO MAIL :
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.zoho.eu'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'pierrenogaro@zohomail.eu'
+DEFAULT_FROM_EMAIL = 'pierrenogaro@zohomail.eu'
+EMAIL_HOST_PASSWORD = '7D9mreCh6sfb'
+EMAIL_USE_TLS = True

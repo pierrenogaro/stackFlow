@@ -21,7 +21,7 @@ urlpatterns = [
     path('questions/delete/<int:pk>/', question_delete, name='question_delete'),
 
 ################# ANSWER #################
-    path('questions/<int:pk>/answers/', answer_create, name='answer_create'),
+    path('questions/<int:pk>/answers/', answer_create, name='answer-create'),
     path('answer/update/<int:pk>/', answer_edit, name='answer_update'),
     path('answer/delete/<int:pk>/', answer_delete, name='answer_delete'),
 

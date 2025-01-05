@@ -1,10 +1,12 @@
 from django.contrib.auth.models import User
+from django.core.mail import send_mail
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
+from stackFlow import settings
 from .serializers import RegisterSerializer, AnswerSerializer, CommentSerializer, ProfileSerializer, FavoriteSerializer
 from rest_framework.decorators import api_view, permission_classes
 from django.shortcuts import get_object_or_404
@@ -140,9 +142,29 @@ def answer_create(request, pk):
     question = get_object_or_404(Question, pk=pk)
     serializer = AnswerSerializer(data=request.data)
     if serializer.is_valid():
-        serializer.save(author=request.user, question=question)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        answer = serializer.save(author=request.user, question=question)
+
+        mail_sent = send_mail(
+            subject='New Answer Added',
+            message=f"A new answer has been added to the question: {question.title}\n\nAnswer content: {answer.content}",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=['pierrenogaro@zohomail.eu'],
+            fail_silently=True,
+        )
+
+        if mail_sent:
+            return Response(
+                {"message": "Answer created successfully, and email sent.", "data": serializer.data},
+                status=status.HTTP_201_CREATED
+            )
+        else:
+            return Response(
+                {"message": "Answer created successfully, but email could not be sent.", "data": serializer.data},
+                status=status.HTTP_201_CREATED
+            )
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['PUT', 'PATCH'])
 @permission_classes([IsAuthenticated])
