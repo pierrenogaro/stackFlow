@@ -7,17 +7,13 @@ from .models import Question, Answer, Comment, Profile, Favorite
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('username', 'password', 'email')
-        extra_kwargs = {
-            'password': {'write_only': True},
-            'email': {'required': True},
-        }
+        fields = ('username', 'password',)
+        extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
         user = User.objects.create_user(
             username=validated_data['username'],
             password=validated_data['password'],
-            email=validated_data['email']
         )
         return user
 
