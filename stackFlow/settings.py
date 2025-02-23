@@ -51,6 +51,7 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -151,3 +152,4 @@ EMAIL_HOST_USER = 'pierrenogaro@zohomail.eu'
 DEFAULT_FROM_EMAIL = 'pierrenogaro@zohomail.eu'
 EMAIL_HOST_PASSWORD = '7D9mreCh6sfb'
 EMAIL_USE_TLS = True
+CORS_ALLOW_ALL_ORIGINS = True
