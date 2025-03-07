@@ -49,10 +49,10 @@ class AnswerSerializer(serializers.ModelSerializer):
 ################# COMMENT #################
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.StringRelatedField(read_only=True)
+    question = serializers.PrimaryKeyRelatedField(read_only=True)
     class Meta:
         model = Comment
-        fields = ['id', 'author', 'content', 'date_created']
-        read_only_fields = ['id', 'author', 'date_created']
+        fields = ['id', 'author', 'content', 'date_created', 'question']
 
 ################# FAVORITE #################
 class FavoriteSerializer(serializers.ModelSerializer):

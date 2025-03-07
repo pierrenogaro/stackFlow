@@ -192,6 +192,12 @@ def answer_delete(request, pk):
     return Response({"detail": "Answer deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
 
 ################# COMMENT #################
+@api_view(['GET'])
+def comment_detail(request, pk):
+    comment = get_object_or_404(Comment, pk=pk)
+    serializer = CommentSerializer(comment)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def comment_create(request, pk):
