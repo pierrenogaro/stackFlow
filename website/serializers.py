@@ -40,6 +40,7 @@ class QuestionSerializer(serializers.ModelSerializer):
 ################# ANSWER #################
 class AnswerSerializer(serializers.ModelSerializer):
     author = serializers.StringRelatedField(read_only=True)
+    question = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Answer

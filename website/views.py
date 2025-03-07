@@ -136,6 +136,12 @@ def question_delete(request, pk):
     return Response({"message": "Question deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
 ################# ANSWER #################
+@api_view(['GET'])
+def answer_detail(request, pk):
+    answer = get_object_or_404(Answer, pk=pk)
+    serializer = AnswerSerializer(answer)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def answer_create(request, pk):
